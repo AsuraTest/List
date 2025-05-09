@@ -1,5 +1,7 @@
-import { MeuBotao } from '../components/MeuBotao.js';
-import './homeScreen.css';
+import React from 'react';
+import { View, Text } from 'react-native';
+import Button from '../components/Button';
+import { cores } from '../styles/global';
 
 export function HomeScreen(navigate) {
   const container = document.createElement('div');
@@ -10,7 +12,6 @@ export function HomeScreen(navigate) {
     <div id="notes-list"></div>
   `;
 
-  // Exemplo de anotações
   const notesList = container.querySelector('#notes-list');
   const notes = JSON.parse(localStorage.getItem('loggedUserNotes')) || [];
   
@@ -24,13 +25,11 @@ export function HomeScreen(navigate) {
     notesList.appendChild(noteElement);
   });
 
-  // Função para navegar até a tela de detalhes
   function viewDetails(index) {
     sessionStorage.setItem('noteIndex', index);
     navigate('detail');
   }
 
-  // Botão para criar nova anotação
   container.appendChild(MeuBotao('Criar Nova Anotação', () => {
     alert('Criando nova anotação...');
   }));
