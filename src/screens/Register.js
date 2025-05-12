@@ -1,29 +1,52 @@
-import './register.css';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export function Register(navigate) {
-  const container = document.createElement('div');
-  container.classList.add('register-container');
+export default function Register({ navigation }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  container.innerHTML = `
-    <h2>Registrar</h2>
-    <input id="username" placeholder="Nome de usuário">
-    <input id="password" type="password" placeholder="Senha">
-    <button id="registerBtn">Registrar</button>
-  `;
+  const handleRegister = async () => {
+    try {
+      const users = await AsyncStorage.getItem('@users');
+      const parsedUsers = users ? JSON.parse(users) : [];
 
-  container.querySelector('#registerBtn').onclick = () => {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    
-    if (localStorage.getItem(username)) {
-      alert('Usuário já existe!');
-    } else {
+      const userExists = parsedUsers.some(user => user.username === username);
+
+      if (userExists) {
+        Alert.alert('Erro', 'Usuário já existe!');
+        return;
+      }
+
       const newUser = { username, password, notes: [] };
-      localStorage.setItem(username, JSON.stringify(newUser));
-      sessionStorage.setItem('loggedUser', username);
-      navigate('home');
+      const updatedUsers = [...parsedUsers, newUser];
+
+      await AsyncStorage.setItem('@users', JSON.stringify(updatedUsers));
+      await AsyncStorage.setItem('@session_user', username);
+
+      navigation.navigate('Home');
+    } catch (error) {
+      Alert.alert('Erro ao registrar usuário');
     }
   };
 
-  return container;
+  return (
+    <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 24, marginBottom: 10 }}>Registrar</Text>
+      <TextInput
+        placeholder="Usuário"
+        value={username}
+        onChangeText={setUsername}
+        style={{ borderWidth: 1, padding: 8, marginBottom: 10 }}
+      />
+      <TextInput
+        placeholder="Senha"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={{ borderWidth: 1, padding: 8, marginBottom: 10 }}
+      />
+      <Button title="Registrar" onPress={handleRegister} />
+    </View>
+  );
 }

@@ -1,32 +1,50 @@
-import './login.css';
+import React, { useState } from 'react';
+import { View, TextInput, Button, Text, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export function Login(navigate) {
-  const container = document.createElement('div');
-  container.classList.add('login-container');
-  
-  container.innerHTML = `
-    <h2>Login</h2>
-    <input id="username" placeholder="Nome de usuário">
-    <input id="password" type="password" placeholder="Senha">
-    <button id="loginBtn">Entrar</button>
-    <button id="registerBtn">Registrar</button>
-  `;
+export default function Login({ navigation }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  container.querySelector('#loginBtn').onclick = () => {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const user = JSON.parse(localStorage.getItem(username));
-    
-    if (user && user.password === password) {
-      sessionStorage.setItem('loggedUser', username);
-      sessionStorage.setItem('loggedUserNotes', JSON.stringify(user.notes || []));
-      navigate('home');
-    } else {
-      alert('Credenciais inválidas!');
+  const handleLogin = async () => {
+    try {
+      const users = await AsyncStorage.getItem('@users');
+      const parsedUsers = users ? JSON.parse(users) : [];
+
+      const foundUser = parsedUsers.find(user => user.username === username);
+
+      if (foundUser && foundUser.password === password) {
+        await AsyncStorage.setItem('@session_user', username);
+        navigation.navigate('Home');
+      } else {
+        Alert.alert('Erro', 'Usuário ou senha incorretos!');
+      }
+    } catch (error) {
+      Alert.alert('Erro ao fazer login');
     }
   };
 
-  container.querySelector('#registerBtn').onclick = () => navigate('register');
-
-  return container;
+  return (
+    <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 24, marginBottom: 10 }}>Login</Text>
+      <TextInput
+        placeholder="Usuário"
+        value={username}
+        onChangeText={setUsername}
+        style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
+      />
+      <TextInput
+        placeholder="Senha"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
+      />
+      <Button title="Entrar" onPress={handleLogin} />
+      <Button
+        title="Registrar"
+        onPress={() => navigation.navigate('Register')}
+      />
+    </View>
+  );
 }
