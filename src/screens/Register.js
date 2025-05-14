@@ -7,28 +7,36 @@ export default function Register({ navigation }) {
   const [password, setPassword] = useState('');
 
   const handleRegister = async () => {
-    try {
-      const users = await AsyncStorage.getItem('@users');
-      const parsedUsers = users ? JSON.parse(users) : [];
+  const trimmedUsername = username.trim();
+  const trimmedPassword = password.trim();
 
-      const userExists = parsedUsers.some(user => user.username === username);
+  if (!trimmedUsername || !trimmedPassword) {
+    Alert.alert('Erro', 'Preencha todos os campos!');
+    return;
+  }
 
-      if (userExists) {
-        Alert.alert('Erro', 'Usuário já existe!');
-        return;
-      }
+  try {
+    const users = await AsyncStorage.getItem('@users');
+    const parsedUsers = users ? JSON.parse(users) : [];
 
-      const newUser = { username, password, notes: [] };
-      const updatedUsers = [...parsedUsers, newUser];
+    const userExists = parsedUsers.some(user => user.username === trimmedUsername);
 
-      await AsyncStorage.setItem('@users', JSON.stringify(updatedUsers));
-      await AsyncStorage.setItem('@session_user', username);
-
-      navigation.navigate('Home');
-    } catch (error) {
-      Alert.alert('Erro ao registrar usuário');
+    if (userExists) {
+      Alert.alert('Erro', 'Usuário já existe!');
+      return;
     }
-  };
+
+    const newUser = { username: trimmedUsername, password: trimmedPassword, notes: [] };
+    const updatedUsers = [...parsedUsers, newUser];
+
+    await AsyncStorage.setItem('@users', JSON.stringify(updatedUsers));
+    await AsyncStorage.setItem('@session_user', trimmedUsername);
+
+    navigation.navigate('Home');
+  } catch (error) {
+    Alert.alert('Erro ao registrar usuário');
+  }
+};
 
   return (
     <View style={{ padding: 20 }}>
