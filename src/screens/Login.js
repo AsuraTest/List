@@ -92,4 +92,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
 },
+  error: {
+    color: '#E53935',
+    marginBottom: 10,
+    fontWeight: 'bold',
+    fontSize: 14
+  }
 });
